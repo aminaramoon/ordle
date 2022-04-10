@@ -1,49 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:wordle/services/storage.dart';
+import 'package:provider/provider.dart';
+import 'package:wordle/states/keyboard_provider.dart';
+import 'package:wordle/widgets/keyboard.dart';
+import 'package:wordle/widgets/wordpad.dart';
 
-class AppLifecycleReactor extends StatefulWidget {
-  AppLifecycleReactor({Key? key, required this.child}) : super(key: key);
-
-  final Storage storage = Storage();
-  final Widget child;
-
-  @override
-  State<AppLifecycleReactor> createState() => _AppLifecycleReactorState();
-}
-
-class _AppLifecycleReactorState extends State<AppLifecycleReactor>
-    with WidgetsBindingObserver {
-  @override
-  void initState() {
-    super.initState();
-    _notification = AppLifecycleState.resumed;
-    WidgetsBinding.instance!.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    print("dispose");
-    WidgetsBinding.instance!.removeObserver(this);
-    super.dispose();
-  }
-
-  late AppLifecycleState _notification;
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    print("didChangeAppLifecycleState $state");
-    setState(() {
-      _notification = state;
-    });
-  }
+class GameScreen extends StatelessWidget {
+  const GameScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text('Last notification: $_notification test'),
-        widget.child,
-      ],
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Ordle"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.repeat),
+            tooltip: 'restart',
+            onPressed: () => context.read<KeyboardProvider>().reset(),
+          ),
+        ],
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const WordPads(numberOfGuesses: 6),
+            Expanded(child: Container()),
+            const Keyboard(),
+          ],
+        ),
+      ),
     );
   }
 }
+
