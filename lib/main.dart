@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:wordle/screens/game_screen.dart';
+// import 'package:wordle/services/io_service.dart';
 import 'package:wordle/states/keyboard_provider.dart';
 import 'package:wordle/widgets/lifetime_reactor.dart';
 
-void main() async {
+Future main() async {
+  // IoService ioService = IoService();
+  // ioService.init();
   runApp(const OrdleApp());
 }
 
@@ -24,9 +27,10 @@ class OrdleApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.lightBlue,
         ),
-        routes: {'/': (context) => const LifetimeReactor(child: GameScreen(),)},
+        routes: {
+          '/': (context) => const LifetimeReactor(child: GameScreen()),
+        },
       ),
     );
   }
 }
-

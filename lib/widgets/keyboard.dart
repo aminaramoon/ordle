@@ -140,7 +140,7 @@ class Keyboard extends StatelessWidget {
                                   actions: [
                                     TextButton(
                                       child: const Text("new game"),
-                                      onPressed: () => provider.newGame(),
+                                      onPressed: () => provider.newGame(null),
                                     ),
                                   ],
                                 ));

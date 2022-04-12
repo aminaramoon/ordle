@@ -19,11 +19,12 @@ class Storage {
     if (_invetory.isEmpty) {
       var dbPath = await _dbPath;
       if (FileSystemEntity.typeSync(dbPath) == FileSystemEntityType.notFound) {
-        print("loading FileSystemEntity");
+        var words = await rootBundle
+            .loadString('assets/data/wordlist_5.txt')
+            .then((lines) => lines.split("\n"));
         return _loadInitialWordList(
             rootBundle.loadString('assets/data/wordlist_5.json'));
       } else {
-        print("loading dbfule");
         return _loadInitialWordList(
             _dbFile.then((dbFile) => dbFile.readAsString()));
       }
@@ -37,12 +38,9 @@ class Storage {
     if (!_invetory.isEmpty) {
       var dbFile = await _dbFile;
       if (await dbFile.exists()) {
-        print("DELETEING file");
         await dbFile.delete();
       }
-      print("CREATING file");
       var dbFd = await dbFile.create();
-      print("WRITING file");
       await dbFd.writeAsString(jsonEncode(_invetory.toJson()));
     }
   }

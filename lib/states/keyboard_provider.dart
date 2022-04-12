@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:wordle/services/dictionary.dart';
+import 'package:wordle/services/io_service.dart';
 import 'package:wordle/services/locale.dart';
 
 enum SubmissionResult { invalid, incorrect, correct, incomplete, done }
 
 class KeyboardProvider with ChangeNotifier {
-
   final LanguageLocale _locale = const LanguageLocale.en();
+  final IoService _ioService = IoService();
 
-  String _keyword = "NATAL";
+  String? _keyword;
 
   final int _numberOfLetters = 5;
   int get numberOfLetters => _numberOfLetters;
@@ -17,18 +18,12 @@ class KeyboardProvider with ChangeNotifier {
   int get numberOfGuesses => _numberOfGuesses;
 
   int _activeRow = 0;
-  int get activeRow => _activeRow;
 
   List<String> _guessWords = List<String>.filled(6, "", growable: false);
   List<String> get guessWords => _guessWords;
 
   String _guessWord = "";
   String get guessWord => _guessWord;
-
-  bool _isWon = false;
-
-  bool _isWord = false;
-  bool get isWord => _isWord;
 
   String _coloredFirstRow = const LanguageLocale.en().firstRow;
   String get coloredFirstRow => _coloredFirstRow;
@@ -39,8 +34,8 @@ class KeyboardProvider with ChangeNotifier {
   String _coloredThirdRow = const LanguageLocale.en().thirdRow;
   String get coloredThirdRow => _coloredThirdRow;
 
-  void newGame() async {
-    _keyword = await Dictionary().chooseWord();
+  void newGame(String? keyword) async {
+    _keyword = keyword ??= await _ioService.nextWord();
     reset();
   }
 
@@ -49,7 +44,6 @@ class KeyboardProvider with ChangeNotifier {
     _coloredSecondRow = _locale.secondRow;
     _coloredThirdRow = _locale.thirdRow;
     _activeRow = 0;
-    _isWon = false;
     _guessWord = "";
     _guessWords = List<String>.filled(numberOfGuesses, "", growable: false);
     notifyListeners();
@@ -95,15 +89,16 @@ class KeyboardProvider with ChangeNotifier {
   }
 
   Future<SubmissionResult> submitAnswer() async {
+    _keyword ??= await _ioService.nextWord();
     if (_guessWord.length == numberOfLetters && _activeRow < numberOfGuesses) {
-      _isWord = await Dictionary().isWord(_guessWord);
-      if (_isWord) {
-        _compareAnswers();
-        _guessWords[activeRow] = _guessWord;
+      final hasMeaning = await Dictionary().isWord(_guessWord);
+      if (hasMeaning) {
+        final isWon = _compareAnswers(_keyword!);
+        _guessWords[_activeRow] = _guessWord;
         _activeRow += 1;
         _guessWord = "";
         notifyListeners();
-        return _isWon
+        return isWon
             ? SubmissionResult.correct
             : _activeRow == numberOfGuesses
                 ? SubmissionResult.done
@@ -118,7 +113,7 @@ class KeyboardProvider with ChangeNotifier {
   void appendLetter(int c) {
     if (_guessWord.length < numberOfLetters && _activeRow < numberOfGuesses) {
       _guessWord += String.fromCharCode(c);
-      _guessWords[activeRow] = _guessWord;
+      _guessWords[_activeRow] = _guessWord;
       notifyListeners();
     }
   }
@@ -126,34 +121,32 @@ class KeyboardProvider with ChangeNotifier {
   void removeLetter() {
     if (_guessWord.isNotEmpty && _activeRow < numberOfGuesses) {
       _guessWord = _guessWord.characters.skipLast(1).toString();
-      _guessWords[activeRow] = _guessWord;
+      _guessWords[_activeRow] = _guessWord;
       notifyListeners();
     }
   }
 
-  void _compareAnswers() {
+  bool _compareAnswers(String keyword) {
     String comparedWord = "";
-    String keywordCpy = _keyword;
     int correctLetters = 0;
 
     for (int i = 0; i != numberOfLetters; i++) {
       var char = _guessWord.characters.elementAt(i);
-      if (keywordCpy.contains(char) &&
-          char == keywordCpy.characters.elementAt(i)) {
+      if (keyword.contains(char) && char == keyword.characters.elementAt(i)) {
         comparedWord += String.fromCharCode(
             _guessWord.characters.elementAt(i).codeUnitAt(0) | 0x100);
-        keywordCpy = keywordCpy.replaceFirst(RegExp(char), '0', i);
+        keyword = keyword.replaceFirst(RegExp(char), '0', i);
         correctLetters += 1;
-      } else if (keywordCpy.contains(char)) {
+      } else if (keyword.contains(char)) {
         comparedWord += String.fromCharCode(
             _guessWord.characters.elementAt(i).codeUnitAt(0) | 0x200);
-        keywordCpy = keywordCpy.replaceFirst(RegExp(char), '0');
+        keyword = keyword.replaceFirst(RegExp(char), '0');
       } else {
         comparedWord += _guessWord.characters.elementAt(i);
       }
     }
-    _isWon = correctLetters == numberOfLetters;
     _guessWord = comparedWord;
     updateKeyboard(comparedWord);
+    return correctLetters == numberOfLetters;
   }
 }
