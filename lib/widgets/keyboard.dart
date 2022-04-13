@@ -22,7 +22,7 @@ class CharKeyPad extends StatelessWidget {
     return Padding(
         padding: const EdgeInsets.fromLTRB(3.0, 5.0, 3.0, 5.0),
         child: ConstrainedBox(
-            constraints: const BoxConstraints.expand(height: 35.0, width: 30.0),
+            constraints: const BoxConstraints.expand(height: 40.0, width: 33.0),
             child: ElevatedButton(
               style: ButtonStyle(
                 shape: MaterialStateProperty.all<OutlinedBorder?>(
@@ -39,7 +39,7 @@ class CharKeyPad extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: AppTheme.keyFontColor,
                   ),
                 ),
               ),
@@ -50,12 +50,11 @@ class CharKeyPad extends StatelessWidget {
 }
 
 class ActionKeyPad extends StatelessWidget {
-  const ActionKeyPad(
-      {Key? key, required this.icon, required this.iconColor, this.callback})
+  const ActionKeyPad({Key? key, required this.icon, this.callback})
       : super(key: key);
 
   final IconData icon;
-  final Color iconColor;
+  final Color iconColor = AppTheme.keyFontColor;
   final VoidCallback? callback;
 
   @override
@@ -70,7 +69,7 @@ class ActionKeyPad extends StatelessWidget {
                     RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(5.0))),
                 backgroundColor:
-                    MaterialStateProperty.all<Color?>(Colors.grey[400]),
+                    MaterialStateProperty.all<Color?>(AppTheme.keypadColor),
                 padding: MaterialStateProperty.all<EdgeInsets?>(
                     const EdgeInsets.all(0)),
               ),
@@ -127,7 +126,6 @@ class Keyboard extends StatelessWidget {
                 children: [
                   ActionKeyPad(
                     icon: Icons.keyboard_return_rounded,
-                    iconColor: Colors.black,
                     callback: () async {
                       var provider = context.read<KeyboardProvider>();
                       var result = await provider.submitAnswer();
@@ -170,7 +168,6 @@ class Keyboard extends StatelessWidget {
                       }),
                   ActionKeyPad(
                       icon: Icons.backspace,
-                      iconColor: Colors.black,
                       callback: () =>
                           context.read<KeyboardProvider>().removeLetter()),
                 ]),

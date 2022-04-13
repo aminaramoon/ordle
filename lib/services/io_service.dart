@@ -22,11 +22,11 @@ class IoService {
 
   Future<String> nextWord() async {
     final str = _nextWordList().then((wordlist) => wordlist.next()!.toUpperCase());
-    // _saveMetaData(_cachedWordList!.meta);
+    if (_cachedWordList != null) await _saveMetaData(_cachedWordList!.meta);
     return str;
   }
 
-  Future<bool> saveMetaData(MetaData meta) async {
+  Future<bool> _saveMetaData(MetaData meta) async {
     return _preferences.setString("meta", meta.toString());
   }
 
@@ -35,8 +35,7 @@ class IoService {
       if (_cachedWordList!.hasMore) {
         return _cachedWordList!;
       } else {
-        _cachedWordList =
-            WordList(meta: _loadMetaData(), words: await _loadMoreWords());
+        _cachedWordList!.reload(await _loadMoreWords());
       }
     } else {
       _cachedWordList =
@@ -46,9 +45,8 @@ class IoService {
   }
 
   MetaData _loadMetaData() {
-    return MetaData.empty();
-    // final meta = _preferences.getString("meta");
-    // return (meta != null) ? MetaData.fromString(meta) : MetaData.empty();
+    final meta = _preferences.getString("meta");
+    return (meta != null) ? MetaData.fromString(meta) : MetaData.empty();
   }
 
   Future<List<String>> _loadMoreWords() async {

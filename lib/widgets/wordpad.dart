@@ -11,7 +11,7 @@ class LetterPad extends StatelessWidget {
     } else {
       letter = String.fromCharCode(code & 0xFF);
       backgroundColor = (code & 0x300 == 0)
-          ? AppTheme.keypadColor
+          ? AppTheme.panelColor
           : (code & 0x100 != 0)
               ? AppTheme.correctLetterColor
               : AppTheme.misplacedLetterColor;
@@ -39,7 +39,7 @@ class LetterPad extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: AppTheme.letterFontColor,
               ),
             ),
           ),
@@ -81,10 +81,10 @@ class WordPads extends StatelessWidget {
         children: [
           for (int i = 0; i != numberOfGuesses; ++i)
             Selector<KeyboardProvider, String>(
-              selector: (_, provider) => provider.guessWords[i],
-              builder: (context, word, child) {
-                return WordPad(keyword: word);
-              })
+                selector: (_, provider) => provider.guessWords[i],
+                builder: (context, word, child) {
+                  return WordPad(keyword: word);
+                })
         ],
       ),
     );
