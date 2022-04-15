@@ -130,19 +130,32 @@ class KeyboardProvider with ChangeNotifier {
     String comparedWord = "";
     int correctLetters = 0;
 
+    String keywordCpy = "";
+    String guessWord = "";
     for (int i = 0; i != numberOfLetters; i++) {
-      var char = _guessWord.characters.elementAt(i);
-      if (keyword.contains(char) && char == keyword.characters.elementAt(i)) {
-        comparedWord += String.fromCharCode(
-            _guessWord.characters.elementAt(i).codeUnitAt(0) | 0x100);
-        keyword = keyword.replaceFirst(RegExp(char), '0', i);
+      final kChar = keyword.characters.elementAt(i);
+      final gChar = _guessWord.characters.elementAt(i);
+      if (kChar == gChar) {
         correctLetters += 1;
-      } else if (keyword.contains(char)) {
-        comparedWord += String.fromCharCode(
-            _guessWord.characters.elementAt(i).codeUnitAt(0) | 0x200);
-        keyword = keyword.replaceFirst(RegExp(char), '0');
+        keywordCpy += String.fromCharCode(kChar.codeUnitAt(0) | 0x100);
+        guessWord += String.fromCharCode(gChar.codeUnitAt(0) | 0x100);
       } else {
-        comparedWord += _guessWord.characters.elementAt(i);
+        keywordCpy += kChar;
+        guessWord += gChar;
+      }
+    }
+
+    for (int i = 0; i != numberOfLetters; i++) {
+      final char = guessWord.characters.elementAt(i);
+      final isFound = keywordCpy.contains(char);
+      if (isFound && char == keywordCpy.characters.elementAt(i)) {
+        comparedWord += char;
+      } else if (isFound) {
+        comparedWord += String.fromCharCode(
+            guessWord.characters.elementAt(i).codeUnitAt(0) | 0x200);
+        keywordCpy = keywordCpy.replaceFirst(RegExp(char), '0');
+      } else {
+        comparedWord += guessWord.characters.elementAt(i);
       }
     }
     _guessWord = comparedWord;

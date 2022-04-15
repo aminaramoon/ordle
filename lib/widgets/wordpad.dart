@@ -7,7 +7,7 @@ class LetterPad extends StatelessWidget {
   LetterPad({Key? key, int code = 0}) : super(key: key) {
     if (code == 0) {
       letter = " ";
-      backgroundColor = Colors.grey;
+      backgroundColor = AppTheme.panelColor;
     } else {
       letter = String.fromCharCode(code & 0xFF);
       backgroundColor = (code & 0x300 == 0)
@@ -29,8 +29,8 @@ class LetterPad extends StatelessWidget {
         constraints: const BoxConstraints.expand(height: 55.0, width: 55.0),
         decoration: BoxDecoration(
             color: backgroundColor,
-            borderRadius: BorderRadius.circular(1),
-            border: Border.all(color: Colors.black, width: 2.5)),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppTheme.panelBorderColor, width: 2.5)),
         child: FittedBox(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(3.0, 5.0, 3.0, 5.0),

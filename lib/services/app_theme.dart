@@ -6,11 +6,11 @@ class AppTheme {
 
   static const Color themeColor = Color.fromRGBO(239, 83, 80, 1);
   static const Color appbarBackgroundColor = Color.fromRGBO(239, 83, 80, 1);
-  static const Color backgroundColor =
-      Color.fromRGBO(189, 189, 189, 1); // Color.fromARGB(255, 255, 228, 152);
+  static const Color backgroundColor = Color.fromRGBO(189, 189, 189, 1);
   static const Color accentColor = Colors.blue;
 
   static const Color panelColor = Colors.transparent;
+  static const Color panelBorderColor = Colors.black;
   static const Color keypadColor = Colors.grey;
   static const Color textColor = Colors.black;
 
