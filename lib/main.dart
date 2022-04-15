@@ -5,6 +5,7 @@ import 'package:wordle/screens/game_screen.dart';
 import 'package:wordle/services/app_theme.dart';
 import 'package:wordle/services/io_service.dart';
 import 'package:wordle/states/keyboard_provider.dart';
+import 'package:wordle/states/oauth_provider.dart';
 import 'package:wordle/widgets/lifetime_reactor.dart';
 
 Future main() async {
@@ -22,7 +23,12 @@ class OrdleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => KeyboardProvider()),
+        ChangeNotifierProvider(
+          create: (_) => KeyboardProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => OAuthProvider(),
+        ),
       ],
       child: MaterialApp(
         initialRoute: '/',
@@ -32,7 +38,7 @@ class OrdleApp extends StatelessWidget {
           primarySwatch: Colors.amber,
         ),
         routes: {
-          '/': (context) => const LifetimeReactor(child: GameScreen()),
+          '/': (context) => LifetimeReactor(child: GameScreen()),
         },
       ),
     );

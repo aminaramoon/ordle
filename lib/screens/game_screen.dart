@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordle/services/app_theme.dart';
 import 'package:wordle/states/keyboard_provider.dart';
+import 'package:wordle/states/oauth_provider.dart';
 import 'package:wordle/widgets/keyboard.dart';
 import 'package:wordle/widgets/wordpad.dart';
 
+enum NumberOfLetters { five, six }
+
 class GameScreen extends StatelessWidget {
-  const GameScreen({Key? key}) : super(key: key);
+  GameScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,10 +19,14 @@ class GameScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppTheme.appbarBackgroundColor,
         title: const Text("Ordle"),
-        leading: IconButton(
-          icon: const Icon(Icons.account_circle),
-          tooltip: 'user',
-          onPressed: () => Scaffold.of(context).openDrawer(),
+        leading: Builder(
+          builder: (BuildContext context) {
+            return IconButton(
+              icon: const Icon(Icons.account_circle),
+              tooltip: 'user',
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            );
+          },
         ),
         actions: [
           IconButton(
@@ -34,10 +41,49 @@ class GameScreen extends StatelessWidget {
           ),
         ],
       ),
-      drawer: const Drawer(
-        child: Text("hello"),
-        backgroundColor: Colors.amber,
-        elevation: 10,
+      drawer: Drawer(
+        child: Container(
+          color: AppTheme.backgroundColor,
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              UserAccountsDrawerHeader(
+                currentAccountPicture: CircleAvatar(
+                  backgroundImage: NetworkImage(
+                    context.watch<OAuthProvider>().imageUrl,
+                  ),
+                ),
+                accountEmail: Text(context.watch<OAuthProvider>().emailAddress),
+                accountName: Text(
+                  context.watch<OAuthProvider>().name,
+                  style: const TextStyle(fontSize: 24.0),
+                ),
+                decoration: const BoxDecoration(
+                  color: AppTheme.appbarBackgroundColor,
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.verified_user_sharp),
+                title: const Text(
+                  'Log In',
+                  style: TextStyle(fontSize: 15.0),
+                ),
+                onTap: () => {},
+              ),
+              Expanded(
+                child: Container(),
+              ),
+              ListTile(
+                leading: const Icon(Icons.info),
+                title: const Text(
+                  'Information',
+                  style: TextStyle(fontSize: 15.0),
+                ),
+                onTap: () => {},
+              ),
+            ],
+          ),
+        ),
       ),
       body: Container(
         margin: const EdgeInsetsDirectional.only(top: 5),
