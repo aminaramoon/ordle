@@ -22,7 +22,7 @@ class CharKeyPad extends StatelessWidget {
     return Padding(
         padding: const EdgeInsets.fromLTRB(3.0, 5.0, 3.0, 5.0),
         child: ConstrainedBox(
-            constraints: const BoxConstraints.expand(height: 40.0, width: 33.0),
+            constraints: const BoxConstraints.expand(height: 40.0, width: 30.0),
             child: ElevatedButton(
               style: ButtonStyle(
                 shape: MaterialStateProperty.all<OutlinedBorder?>(
