@@ -62,7 +62,7 @@ flutter:
   assets:
     - assets/data/wordlist_5.json
     - assets/data/wordlist_5.txt
-    - assets/data/dictionary.dat
+    - assets/data/dictionary.txt
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:wordle/services/dictionary.dart';
-import 'package:wordle/services/io_service.dart';
 import 'package:wordle/services/locale.dart';
 
 enum SubmissionResult { invalid, incorrect, correct, incomplete, done }
 
 class KeyboardProvider with ChangeNotifier {
   final LanguageLocale _locale = const LanguageLocale.en();
-  final IoService _ioService = IoService();
+  final _dictionary = Dictionary();
 
   String? _keyword;
 
@@ -35,7 +34,7 @@ class KeyboardProvider with ChangeNotifier {
   String get coloredThirdRow => _coloredThirdRow;
 
   void newGame(String? keyword) async {
-    _keyword = keyword ??= await _ioService.nextWord();
+    _keyword = keyword ??= await _dictionary.nextWord();
     reset();
   }
 
@@ -89,11 +88,15 @@ class KeyboardProvider with ChangeNotifier {
   }
 
   Future<SubmissionResult> submitAnswer() async {
-    _keyword ??= await _ioService.nextWord();
+    _keyword ??= await _dictionary.nextWord();
+    print("KEYWORD IS $_keyword!");
     if (_guessWord.length == numberOfLetters && _activeRow < numberOfGuesses) {
-      final hasMeaning = await Dictionary().isWord(_guessWord);
+      final hasMeaning =
+          (_guessWord == _keyword) || await _dictionary.isWord(_guessWord);
+      print("HAS MEANING $_keyword! $hasMeaning");
       if (hasMeaning) {
         final isWon = _compareAnswers(_keyword!);
+        print("HAS MEANING $_keyword! $hasMeaning $isWon");
         _guessWords[_activeRow] = _guessWord;
         _activeRow += 1;
         _guessWord = "";

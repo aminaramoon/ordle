@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:wordle/screens/game_screen.dart';
-import 'package:wordle/services/app_theme.dart';
-import 'package:wordle/services/io_service.dart';
+import 'package:wordle/services/dictionary.dart';
 import 'package:wordle/states/keyboard_provider.dart';
 import 'package:wordle/states/oauth_provider.dart';
 import 'package:wordle/widgets/lifetime_reactor.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  IoService ioService = IoService();
-  ioService.init();
+  Dictionary dictionary = Dictionary();
+  dictionary.init();
   runApp(const OrdleApp());
 }
 
@@ -38,7 +37,7 @@ class OrdleApp extends StatelessWidget {
           primarySwatch: Colors.amber,
         ),
         routes: {
-          '/': (context) => LifetimeReactor(child: GameScreen()),
+          '/': (context) => const LifetimeReactor(child: GameScreen()),
         },
       ),
     );

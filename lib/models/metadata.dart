@@ -1,19 +1,23 @@
 import 'dart:convert';
 
 class MetaData {
-  MetaData({required this.index, required this.offsetGlobal});
+  MetaData({required this.index, required this.size});
 
   MetaData.empty()
       : index = 0,
-        offsetGlobal = 0;
+        size = 0;
+
+  bool get isEmpty => size == 0;
+
+  bool get hasMore => index < size - 1;
 
   MetaData.fromJson(Map<String, dynamic> json)
       : index = json.containsKey("index") ? json["index"] : 0,
-        offsetGlobal = json.containsKey("offset") ? json["offset"] : 0;
+        size = json.containsKey("size") ? json["size"] : 0;
 
   Map<String, dynamic> toJson() => {
         'index': index,
-        'offset': offsetGlobal,
+        'size': size,
       };
 
   MetaData.fromString(String str) : this.fromJson(jsonDecode(str));
@@ -22,5 +26,5 @@ class MetaData {
   String toString() => jsonEncode(toJson());
 
   int index;
-  int offsetGlobal;
+  int size;
 }

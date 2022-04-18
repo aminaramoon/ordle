@@ -1,61 +1,81 @@
 import 'dart:async' show Future;
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wordle/models/metadata.dart';
-import 'package:wordle/models/wordlist.dart';
 
 class IoService {
-  static final IoService _singleton = IoService._internal();
-
-  factory IoService() {
-    return _singleton;
-  }
-
-  IoService._internal();
-
   late final SharedPreferences _preferences;
-  WordList? _cachedWordList;
 
   Future init() async {
     _preferences = await SharedPreferences.getInstance();
   }
 
-  Future<String> nextWord() async {
-    final str = _nextWordList().then((wordlist) => wordlist.next()!.toUpperCase());
-    if (_cachedWordList != null) await _saveMetaData(_cachedWordList!.meta);
-    return str;
-  }
-
-  Future<bool> _saveMetaData(MetaData meta) async {
+  Future<bool> storeMetaData(MetaData meta) async {
     return _preferences.setString("meta", meta.toString());
   }
 
-  Future<WordList> _nextWordList() async {
-    if (_cachedWordList != null) {
-      if (_cachedWordList!.hasMore) {
-        return _cachedWordList!;
-      } else {
-        _cachedWordList!.reload(await _loadMoreWords());
-      }
-    } else {
-      _cachedWordList =
-          WordList(meta: _loadMetaData(), words: await _initWords());
-    }
-    return _cachedWordList!;
-  }
-
-  MetaData _loadMetaData() {
+  MetaData loadMetaData() {
     final meta = _preferences.getString("meta");
     return (meta != null) ? MetaData.fromString(meta) : MetaData.empty();
   }
 
-  Future<List<String>> _loadMoreWords() async {
-    return List.empty();
+  Future storeWordList(List<String> words) async {
+    final dbFile = await _localFile;
+    if (dbFile.existsSync()) {
+      dbFile.delete().then((value) => storeWordList(words));
+    } else {
+      dbFile.open(mode: FileMode.write);
+      dbFile.writeAsString(jsonEncode(words));
+    }
   }
 
-  Future<List<String>> _initWords() async {
+  Future<List<String>> loadWordList(MetaData metaData) async {
+    final dbFile = await _localFile;
+    if (dbFile.existsSync()) {
+      if (!metaData.isEmpty && metaData.hasMore) {
+        return dbFile
+            .openRead()
+            .transform(utf8.decoder)
+            .transform(const LineSplitter())
+            .toList();
+      }
+      return List<String>.empty();
+    } else {
+      return rootBundle
+          .loadString('assets/data/wordlist_5.txt')
+          .then((value) => value.split("\n"))
+          .then((words) => words..shuffle())
+          .then((words) {
+        metaData.index = 0;
+        metaData.size = words.length;
+        return storeWordList(words).then((value) => words);
+      });
+    }
+  }
+
+  Future<List<String>> loadInitialWordList() async {
     return rootBundle
         .loadString('assets/data/wordlist_5.txt')
+        .then((value) => value.split("\n"))
+        .then((words) => words..shuffle());
+  }
+
+  Future<List<String>> loadDictionary() async {
+    return rootBundle
+        .loadString('assets/data/dictionary.txt')
         .then((value) => value.split("\n"));
+  }
+
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return directory.path;
+  }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    return File('$path/db.txt');
   }
 }
