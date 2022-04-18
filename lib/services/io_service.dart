@@ -28,7 +28,7 @@ class IoService {
       dbFile.delete().then((value) => storeWordList(words));
     } else {
       dbFile.open(mode: FileMode.write);
-      dbFile.writeAsString(jsonEncode(words));
+      dbFile.writeAsString(words.join('\n'));
     }
   }
 
@@ -36,24 +36,20 @@ class IoService {
     final dbFile = await _localFile;
     if (dbFile.existsSync()) {
       if (!metaData.isEmpty && metaData.hasMore) {
-        return dbFile
-            .openRead()
-            .transform(utf8.decoder)
-            .transform(const LineSplitter())
-            .toList();
+        dbFile.open(mode: FileMode.read);
+        return dbFile.readAsLines();
       }
-      return List<String>.empty();
-    } else {
-      return rootBundle
-          .loadString('assets/data/wordlist_5.txt')
-          .then((value) => value.split("\n"))
-          .then((words) => words..shuffle())
-          .then((words) {
-        metaData.index = 0;
-        metaData.size = words.length;
-        return storeWordList(words).then((value) => words);
-      });
+      return List.empty();
     }
+    return rootBundle
+        .loadString('assets/data/wordlist_5.txt')
+        .then((value) => value.split("\n"))
+        .then((words) => words..shuffle())
+        .then((words) {
+      metaData.index = 0;
+      metaData.size = words.length;
+      return storeWordList(words).then((_) => words);
+    });
   }
 
   Future<List<String>> loadInitialWordList() async {

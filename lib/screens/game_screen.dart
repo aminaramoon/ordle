@@ -6,8 +6,6 @@ import 'package:wordle/states/oauth_provider.dart';
 import 'package:wordle/widgets/keyboard.dart';
 import 'package:wordle/widgets/wordpad.dart';
 
-enum NumberOfLetters { five, six }
-
 class GameScreen extends StatelessWidget {
   const GameScreen({Key? key}) : super(key: key);
 
@@ -35,9 +33,9 @@ class GameScreen extends StatelessWidget {
             onPressed: () => context.read<KeyboardProvider>().reset(),
           ),
           IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: 'add word',
-            onPressed: () => {},
+            icon: const Icon(Icons.skip_next),
+            tooltip: 'skip',
+            onPressed: () => context.read<KeyboardProvider>().newGame(null),
           ),
         ],
       ),
@@ -93,9 +91,7 @@ class GameScreen extends StatelessWidget {
             const WordPads(numberOfGuesses: 6),
             Expanded(child: Container()),
             const Keyboard(),
-            const SizedBox(
-              height: 50,
-            ),
+            const SizedBox(height: 30),
           ],
         ),
       ),

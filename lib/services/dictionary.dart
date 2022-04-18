@@ -21,19 +21,22 @@ class Dictionary {
 
   final IoService _ioService = IoService();
   final List<int> _cachedDictionary = List.empty(growable: true);
-  List<String>? _wordList;
+  List<String> _wordList = List.empty(growable: true);
   late final MetaData _metaData;
 
   Future<String> nextWord() async {
-    _wordList ??= await _ioService.loadWordList(_metaData);
+    if (_wordList.isEmpty) {
+      _wordList = [...await _ioService.loadWordList(_metaData)];
+    }
     final index = _metaData.index++;
     _ioService.storeMetaData(_metaData);
-    return _wordList!.elementAt(index).toUpperCase();
+    print(
+        "WHAT THE FUCK IS HAPPENING $index ${_wordList.length} ${_wordList.elementAt(index)}");
+    return _wordList.elementAt(index).toUpperCase();
   }
 
   Future<bool> isWord(String word) async {
     if (_lookupDictioary(word)) {
-      print("_lookupDictioary(${word})");
       return true;
     }
     return _lookupOnline(word);

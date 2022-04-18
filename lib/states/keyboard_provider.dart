@@ -9,6 +9,7 @@ class KeyboardProvider with ChangeNotifier {
   final _dictionary = Dictionary();
 
   String? _keyword;
+  String get keyword => _keyword ?? "";
 
   final int _numberOfLetters = 5;
   int get numberOfLetters => _numberOfLetters;
@@ -89,14 +90,11 @@ class KeyboardProvider with ChangeNotifier {
 
   Future<SubmissionResult> submitAnswer() async {
     _keyword ??= await _dictionary.nextWord();
-    print("KEYWORD IS $_keyword!");
     if (_guessWord.length == numberOfLetters && _activeRow < numberOfGuesses) {
       final hasMeaning =
           (_guessWord == _keyword) || await _dictionary.isWord(_guessWord);
-      print("HAS MEANING $_keyword! $hasMeaning");
       if (hasMeaning) {
         final isWon = _compareAnswers(_keyword!);
-        print("HAS MEANING $_keyword! $hasMeaning $isWon");
         _guessWords[_activeRow] = _guessWord;
         _activeRow += 1;
         _guessWord = "";

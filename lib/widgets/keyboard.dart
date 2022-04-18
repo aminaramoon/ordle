@@ -131,32 +131,54 @@ class Keyboard extends StatelessWidget {
                       var result = await provider.submitAnswer();
                       if (result == SubmissionResult.correct) {
                         showDialog(
+                            barrierDismissible: false,
                             context: context,
                             builder: (context) => AlertDialog(
                                   title: const Text("Congratulations!!"),
                                   content: const Text("splenid"),
+                                  backgroundColor: Colors.green,
                                   actions: [
                                     TextButton(
                                       child: const Text("new game"),
-                                      onPressed: () => provider.newGame(null),
+                                      onPressed: () {
+                                        provider.newGame(null);
+                                        Navigator.of(context,
+                                                rootNavigator: false)
+                                            .pop();
+                                      },
                                     ),
                                   ],
                                 ));
                       } else if (result == SubmissionResult.invalid) {
                         ScaffoldMessenger.of(context)
                           ..hideCurrentSnackBar()
-                          ..showSnackBar(const SnackBar(
-                            content: Text('not a word'),
+                          ..showSnackBar(SnackBar(
+                            content: Text(
+                                "not a word ${provider.guessWord.toLowerCase()}"),
                             behavior: SnackBarBehavior.floating,
-                            duration: Duration(seconds: 1),
-                            backgroundColor: Color.fromARGB(255, 19, 20, 20),
+                            duration: const Duration(seconds: 1),
+                            backgroundColor:
+                                const Color.fromARGB(255, 19, 20, 20),
                           ));
                       } else if (result == SubmissionResult.done) {
                         showDialog(
+                            barrierDismissible: false,
                             context: context,
-                            builder: (context) => const AlertDialog(
-                                  title: Text("done"),
-                                  content: Text("hello"),
+                            builder: (context) => AlertDialog(
+                                  title: const Text("done"),
+                                  content: Text(
+                                      "word is ${provider.keyword.toLowerCase()}"),
+                                  actions: [
+                                    TextButton(
+                                      child: const Text("new game"),
+                                      onPressed: () {
+                                        provider.newGame(null);
+                                        Navigator.of(context,
+                                                rootNavigator: false)
+                                            .pop();
+                                      },
+                                    ),
+                                  ],
                                 ));
                       }
                     },
