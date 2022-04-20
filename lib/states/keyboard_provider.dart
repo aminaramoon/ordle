@@ -17,6 +17,8 @@ class KeyboardProvider with ChangeNotifier {
   final int _numberOfGuesses = 6;
   int get numberOfGuesses => _numberOfGuesses;
 
+  double radius = 8;
+
   int _activeRow = 0;
 
   List<String> _guessWords = List<String>.filled(6, "", growable: false);

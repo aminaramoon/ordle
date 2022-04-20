@@ -4,7 +4,7 @@ import 'package:wordle/services/app_theme.dart';
 import 'package:wordle/states/keyboard_provider.dart';
 
 class LetterPad extends StatelessWidget {
-  LetterPad({Key? key, int code = 0}) : super(key: key) {
+  LetterPad({Key? key, int code = 0, required this.radius}) : super(key: key) {
     if (code == 0) {
       letter = " ";
       backgroundColor = AppTheme.panelColor;
@@ -20,16 +20,19 @@ class LetterPad extends StatelessWidget {
 
   late final String letter;
   late final Color backgroundColor;
+  final double radius;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(3.0, 5.0, 3.0, 5.0),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.fastOutSlowIn,
         constraints: const BoxConstraints.expand(height: 55.0, width: 55.0),
         decoration: BoxDecoration(
             color: backgroundColor,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(radius),
             border: Border.all(color: AppTheme.panelBorderColor, width: 2.5)),
         child: FittedBox(
           child: Padding(
@@ -50,11 +53,14 @@ class LetterPad extends StatelessWidget {
 }
 
 class WordPad extends StatelessWidget {
-  WordPad({Key? key, String keyword = ""}) : super(key: key) {
-    wordState = (keyword + "     ").substring(0, 5);
+  WordPad({Key? key, String keyword = ""})
+      : radius = keyword.length != 5 ? 8 : 20,
+        super(key: key) {
+    wordState = (keyword + "      ").substring(0, 5);
   }
 
   late final String wordState;
+  final double radius;
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +69,7 @@ class WordPad extends StatelessWidget {
         children: wordState.characters
             .map<LetterPad>((element) => LetterPad(
                   code: element.codeUnitAt(0),
+                  radius: radius,
                 ))
             .toList());
   }

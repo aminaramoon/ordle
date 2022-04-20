@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'package:provider/provider.dart';
 import 'package:wordle/services/app_theme.dart';
 import 'package:wordle/states/keyboard_provider.dart';
@@ -43,8 +45,10 @@ class CharKeyPad extends StatelessWidget {
                   ),
                 ),
               ),
-              onPressed: () =>
-                  context.read<KeyboardProvider>().appendLetter(code & 0x7f),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                context.read<KeyboardProvider>().appendLetter(code & 0x7f);
+              },
             )));
   }
 }
@@ -60,24 +64,29 @@ class ActionKeyPad extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.fromLTRB(3.0, 5.0, 3.0, 5.0),
-        child: ConstrainedBox(
-            constraints: const BoxConstraints.expand(height: 35.0, width: 45.0),
-            child: ElevatedButton(
-              style: ButtonStyle(
-                shape: MaterialStateProperty.all<OutlinedBorder?>(
-                    RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5.0))),
-                backgroundColor:
-                    MaterialStateProperty.all<Color?>(AppTheme.keypadColor),
-                padding: MaterialStateProperty.all<EdgeInsets?>(
-                    const EdgeInsets.all(0)),
-              ),
-              child: Center(
-                child: Icon(icon, color: iconColor),
-              ),
-              onPressed: callback,
-            )));
+      padding: const EdgeInsets.fromLTRB(3.0, 5.0, 3.0, 5.0),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints.expand(height: 40.0, width: 45.0),
+        child: ElevatedButton(
+          style: ButtonStyle(
+            shape: MaterialStateProperty.all<OutlinedBorder?>(
+                RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5.0))),
+            backgroundColor:
+                MaterialStateProperty.all<Color?>(AppTheme.keypadColor),
+            padding:
+                MaterialStateProperty.all<EdgeInsets?>(const EdgeInsets.all(0)),
+          ),
+          child: Center(
+            child: Icon(icon, color: iconColor),
+          ),
+          onPressed: () {
+            HapticFeedback.heavyImpact();
+            if (callback != null) callback!();
+          },
+        ),
+      ),
+    );
   }
 }
 
@@ -189,9 +198,10 @@ class Keyboard extends StatelessWidget {
                         return KeyPadRow(keys: keypads);
                       }),
                   ActionKeyPad(
-                      icon: Icons.backspace,
-                      callback: () =>
-                          context.read<KeyboardProvider>().removeLetter()),
+                    icon: Icons.backspace,
+                    callback: () =>
+                        context.read<KeyboardProvider>().removeLetter(),
+                  ),
                 ]),
           ],
         ),
