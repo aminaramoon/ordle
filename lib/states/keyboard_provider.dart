@@ -129,6 +129,21 @@ class KeyboardProvider with ChangeNotifier {
     }
   }
 
+  String get winningMessage {
+    switch (_activeRow) {
+      case 0:
+        return "one in a million!";
+      case 1:
+        return "great job!";
+      case 2:
+      case 3:
+      case 4:
+        return "good job!";
+      default:
+        return "phew!";
+    }
+  }
+
   bool _compareAnswers(String keyword) {
     String comparedWord = "";
     int correctLetters = 0;

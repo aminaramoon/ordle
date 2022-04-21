@@ -143,8 +143,9 @@ class Keyboard extends StatelessWidget {
                             barrierDismissible: false,
                             context: context,
                             builder: (context) => AlertDialog(
-                                  title: const Text("Congratulations!!"),
-                                  content: const Text("splenid"),
+                                  title: Text(provider.winningMessage),
+                                  content: Text(
+                                      "word was ${provider.guessWord.toLowerCase()}"),
                                   backgroundColor: Colors.green,
                                   actions: [
                                     TextButton(

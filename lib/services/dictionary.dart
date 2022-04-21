@@ -30,8 +30,6 @@ class Dictionary {
     }
     final index = _metaData.index++;
     _ioService.storeMetaData(_metaData);
-    print(
-        "WHAT THE FUCK IS HAPPENING $index ${_wordList.length} ${_wordList.elementAt(index)}");
     return _wordList.elementAt(index).toUpperCase();
   }
 
