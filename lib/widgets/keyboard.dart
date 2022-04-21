@@ -190,6 +190,25 @@ class Keyboard extends StatelessWidget {
                                     ),
                                   ],
                                 ));
+                      } else if (result == SubmissionResult.notMatch) {
+                        showDialog(
+                            barrierDismissible: false,
+                            context: context,
+                            builder: (context) => AlertDialog(
+                                  title: const Text("done"),
+                                  content: Text(
+                                      "word is ${provider.hardModeMismatchMsg}"),
+                                  actions: [
+                                    TextButton(
+                                      child: const Text("continue"),
+                                      onPressed: () {
+                                        Navigator.of(context,
+                                                rootNavigator: false)
+                                            .pop();
+                                      },
+                                    ),
+                                  ],
+                                ));
                       }
                     },
                   ),

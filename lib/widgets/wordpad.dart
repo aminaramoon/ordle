@@ -53,9 +53,8 @@ class LetterPad extends StatelessWidget {
 }
 
 class WordPad extends StatelessWidget {
-  WordPad({Key? key, String keyword = ""})
-      : radius = keyword.length != 5 ? 8 : 20,
-        super(key: key) {
+  WordPad({Key? key, String keyword = "", required this.radius})
+      : super(key: key) {
     wordState = (keyword + "      ").substring(0, 5);
   }
 
@@ -87,10 +86,13 @@ class WordPads extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           for (int i = 0; i != numberOfGuesses; ++i)
-            Selector<KeyboardProvider, String>(
-                selector: (_, provider) => provider.guessWords[i],
-                builder: (context, word, child) {
-                  return WordPad(keyword: word);
+            Selector<KeyboardProvider, WordRowState>(
+                selector: (_, provider) => provider.guessStates[i],
+                builder: (context, state, child) {
+                  return WordPad(
+                    keyword: state.word,
+                    radius: state.radius,
+                  );
                 })
         ],
       ),

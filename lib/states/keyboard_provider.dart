@@ -2,7 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:wordle/services/dictionary.dart';
 import 'package:wordle/services/locale.dart';
 
-enum SubmissionResult { invalid, incorrect, correct, incomplete, done }
+enum SubmissionResult {
+  invalid,
+  incorrect,
+  correct,
+  incomplete,
+  done,
+  notMatch,
+}
+
+class WordRowState {
+  WordRowState({required this.word, required this.state}) : radius = 8;
+
+  WordRowState.empty()
+      : word = "",
+        state = SubmissionResult.invalid,
+        radius = 8;
+
+  WordRowState.keyword(String keyword)
+      : word = keyword,
+        state = SubmissionResult.invalid,
+        radius = 8;
+
+  WordRowState.fromGuess(String keyword)
+      : word = keyword,
+        state = SubmissionResult.incomplete,
+        radius = 20;
+
+  final String word;
+  final SubmissionResult state;
+  final double radius;
+}
 
 class KeyboardProvider with ChangeNotifier {
   final LanguageLocale _locale = const LanguageLocale.en();
@@ -17,12 +47,14 @@ class KeyboardProvider with ChangeNotifier {
   final int _numberOfGuesses = 6;
   int get numberOfGuesses => _numberOfGuesses;
 
-  double radius = 8;
+  bool _hardMode = false;
+  bool get hardMode => _hardMode;
 
   int _activeRow = 0;
 
-  List<String> _guessWords = List<String>.filled(6, "", growable: false);
-  List<String> get guessWords => _guessWords;
+  List<WordRowState> _guessStates =
+      List<WordRowState>.filled(6, WordRowState.empty(), growable: false);
+  List<WordRowState> get guessStates => _guessStates;
 
   String _guessWord = "";
   String get guessWord => _guessWord;
@@ -47,7 +79,8 @@ class KeyboardProvider with ChangeNotifier {
     _coloredThirdRow = _locale.thirdRow;
     _activeRow = 0;
     _guessWord = "";
-    _guessWords = List<String>.filled(numberOfGuesses, "", growable: false);
+    _guessStates =
+        List<WordRowState>.filled(6, WordRowState.empty(), growable: false);
     notifyListeners();
   }
 
@@ -93,11 +126,14 @@ class KeyboardProvider with ChangeNotifier {
   Future<SubmissionResult> submitAnswer() async {
     _keyword ??= await _dictionary.nextWord();
     if (_guessWord.length == numberOfLetters && _activeRow < numberOfGuesses) {
+      if (_hardMode && _isHardMatch(_guessWord)) {
+        return SubmissionResult.notMatch;
+      }
       final hasMeaning =
           (_guessWord == _keyword) || await _dictionary.isWord(_guessWord);
       if (hasMeaning) {
         final isWon = _compareAnswers(_keyword!);
-        _guessWords[_activeRow] = _guessWord;
+        _guessStates[_activeRow] = WordRowState.fromGuess(_guessWord);
         _activeRow += 1;
         _guessWord = "";
         notifyListeners();
@@ -116,7 +152,7 @@ class KeyboardProvider with ChangeNotifier {
   void appendLetter(int c) {
     if (_guessWord.length < numberOfLetters && _activeRow < numberOfGuesses) {
       _guessWord += String.fromCharCode(c);
-      _guessWords[_activeRow] = _guessWord;
+      _guessStates[_activeRow] = WordRowState.keyword(_guessWord);
       notifyListeners();
     }
   }
@@ -124,7 +160,7 @@ class KeyboardProvider with ChangeNotifier {
   void removeLetter() {
     if (_guessWord.isNotEmpty && _activeRow < numberOfGuesses) {
       _guessWord = _guessWord.characters.skipLast(1).toString();
-      _guessWords[_activeRow] = _guessWord;
+      _guessStates[_activeRow] = WordRowState.keyword(_guessWord);
       notifyListeners();
     }
   }
@@ -142,6 +178,18 @@ class KeyboardProvider with ChangeNotifier {
       default:
         return "phew!";
     }
+  }
+
+  String get hardModeMismatchMsg {
+    return "hello";
+  }
+
+  void toggleHardMode(bool newValue) {
+    _hardMode = newValue;
+  }
+
+  bool _isHardMatch(String string) {
+    return false;
   }
 
   bool _compareAnswers(String keyword) {
