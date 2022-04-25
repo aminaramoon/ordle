@@ -91,6 +91,9 @@ class GameScreen extends StatelessWidget {
             const WordPads(numberOfGuesses: 6),
             Expanded(child: Container()),
             const Keyboard(),
+            const SizedBox(
+              height: 20,
+            ),
           ],
         ),
       ),
