@@ -16,18 +16,23 @@ class WordRowState {
 
   WordRowState.empty()
       : word = "",
-        state = SubmissionResult.invalid,
+        state = SubmissionResult.incomplete,
         radius = 8;
 
   WordRowState.keyword(String keyword)
       : word = keyword,
-        state = SubmissionResult.invalid,
+        state = SubmissionResult.incomplete,
         radius = 8;
 
   WordRowState.fromGuess(String keyword)
       : word = keyword,
-        state = SubmissionResult.incomplete,
+        state = SubmissionResult.correct,
         radius = 20;
+
+  WordRowState.fromInvalidWord(String keyword)
+      : word = keyword,
+        state = SubmissionResult.invalid,
+        radius = 8;
 
   final String word;
   final SubmissionResult state;
@@ -143,6 +148,8 @@ class KeyboardProvider with ChangeNotifier {
                 ? SubmissionResult.done
                 : SubmissionResult.incorrect;
       } else {
+        _guessStates[_activeRow] = WordRowState.fromInvalidWord(_guessWord);
+        notifyListeners();
         return SubmissionResult.invalid;
       }
     }

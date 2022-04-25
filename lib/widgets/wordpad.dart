@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordle/services/app_theme.dart';
@@ -53,17 +55,22 @@ class LetterPad extends StatelessWidget {
 }
 
 class WordPad extends StatelessWidget {
-  WordPad({Key? key, String keyword = "", required this.radius})
+  WordPad(
+      {Key? key,
+      String keyword = "",
+      required this.radius,
+      required this.shake})
       : super(key: key) {
     wordState = (keyword + "      ").substring(0, 5);
   }
 
   late final String wordState;
   final double radius;
+  final bool shake;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    Widget myWidget = Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: wordState.characters
             .map<LetterPad>((element) => LetterPad(
@@ -71,6 +78,17 @@ class WordPad extends StatelessWidget {
                   radius: radius,
                 ))
             .toList());
+    return !shake
+        ? myWidget
+        : TweenAnimationBuilder(
+            child: myWidget,
+            curve: Curves.easeInOutCirc,
+            tween: Tween(begin: 1.0, end: 0.0),
+            duration: const Duration(milliseconds: 400),
+            builder: (context, double value, child) {
+              return Transform.translate(
+                  offset: Offset(sin(value * 2 * pi) * 5, 0.0), child: child);
+            });
   }
 }
 
@@ -92,6 +110,7 @@ class WordPads extends StatelessWidget {
                   return WordPad(
                     keyword: state.word,
                     radius: state.radius,
+                    shake: state.state == SubmissionResult.invalid,
                   );
                 })
         ],

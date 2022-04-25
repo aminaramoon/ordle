@@ -22,34 +22,35 @@ class CharKeyPad extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.fromLTRB(3.0, 5.0, 3.0, 5.0),
-        child: ConstrainedBox(
-            constraints: const BoxConstraints.expand(height: 40.0, width: 30.0),
-            child: ElevatedButton(
-              style: ButtonStyle(
-                shape: MaterialStateProperty.all<OutlinedBorder?>(
-                    RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5.0))),
-                backgroundColor:
-                    MaterialStateProperty.all<Color?>(backgroundColor),
-                padding: MaterialStateProperty.all<EdgeInsets?>(
-                    const EdgeInsets.all(0)),
+      padding: const EdgeInsets.fromLTRB(3.0, 3.0, 3.0, 3.0),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints.expand(height: 40.0, width: 30.0),
+        child: ElevatedButton(
+          style: ButtonStyle(
+            shape: MaterialStateProperty.all<OutlinedBorder?>(
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
+            ),
+            backgroundColor: MaterialStateProperty.all<Color?>(backgroundColor),
+            padding:
+                MaterialStateProperty.all<EdgeInsets?>(const EdgeInsets.all(0)),
+          ),
+          child: Center(
+            child: Text(
+              String.fromCharCode(code & 0x7f),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.keyFontColor,
               ),
-              child: Center(
-                child: Text(
-                  String.fromCharCode(code & 0x7f),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.keyFontColor,
-                  ),
-                ),
-              ),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                context.read<KeyboardProvider>().appendLetter(code & 0x7f);
-              },
-            )));
+            ),
+          ),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            context.read<KeyboardProvider>().appendLetter(code & 0x7f);
+          },
+        ),
+      ),
+    );
   }
 }
 
