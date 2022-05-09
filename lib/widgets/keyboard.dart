@@ -224,6 +224,23 @@ class Keyboard extends StatelessWidget {
                         context.read<KeyboardProvider>().removeLetter(),
                   ),
                 ]),
+            Container(
+              alignment: Alignment.bottomRight,
+              child: SizedBox(
+                height: 20,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    primary: Colors.black,
+                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(2.0)),
+                    ),
+                  ),
+                  child: const Icon(Icons.arrow_drop_down),
+                  onPressed: () => {},
+                ),
+              ),
+            ),
           ],
         ),
       ),

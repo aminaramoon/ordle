@@ -34,10 +34,16 @@ class OrdleApp extends StatelessWidget {
         title: 'Ordle',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          primarySwatch: Colors.amber,
+          primarySwatch: Colors.blueGrey,
         ),
         routes: {
-          '/': (context) => const LifetimeReactor(child: GameScreen()),
+          '/': (context) => LifetimeReactor(
+                child: const GameScreen(),
+                onResume: () =>
+                    context.read<KeyboardProvider>().setVisible(true),
+                onInactive: () =>
+                    context.read<KeyboardProvider>().setVisible(false),
+              ),
         },
       ),
     );

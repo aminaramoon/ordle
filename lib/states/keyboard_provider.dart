@@ -55,6 +55,9 @@ class KeyboardProvider with ChangeNotifier {
   bool _hardMode = false;
   bool get hardMode => _hardMode;
 
+  bool _visible = true;
+  bool get visible => _visible;
+
   int _activeRow = 0;
 
   List<WordRowState> _guessStates =
@@ -191,12 +194,17 @@ class KeyboardProvider with ChangeNotifier {
     return "hello";
   }
 
-  void toggleHardMode(bool newValue) {
-    _hardMode = newValue;
+  void setVisible(bool visibility) {
+    _visible = visibility;
+    notifyListeners();
+  }
+
+  void toggleHardMode() {
+    _hardMode = !_hardMode;
   }
 
   bool _isHardMatch(String string) {
-    return false;
+    return true;
   }
 
   bool _compareAnswers(String keyword) {

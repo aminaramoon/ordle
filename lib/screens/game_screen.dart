@@ -27,14 +27,16 @@ class GameScreen extends StatelessWidget {
           },
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.repeat),
-            tooltip: 'reset',
+          TextButton(
+            child: const Text("hard"),
+            onPressed: () => context.read<KeyboardProvider>().toggleHardMode(),
+          ),
+          TextButton(
+            child: const Text("redo"),
             onPressed: () => context.read<KeyboardProvider>().reset(),
           ),
-          IconButton(
-            icon: const Icon(Icons.skip_next),
-            tooltip: 'skip',
+          TextButton(
+            child: const Text("skip"),
             onPressed: () => context.read<KeyboardProvider>().newGame(null),
           ),
         ],
@@ -91,9 +93,10 @@ class GameScreen extends StatelessWidget {
             const WordPads(numberOfGuesses: 6),
             Expanded(child: Container()),
             const Keyboard(),
-            const SizedBox(
-              height: 20,
-            ),
+            Visibility(
+              child: const Keyboard(),
+              visible: context.watch<KeyboardProvider>().visible,
+            )
           ],
         ),
       ),
