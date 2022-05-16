@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordle/services/app_theme.dart';
+import 'package:wordle/services/locale.dart';
 import 'package:wordle/states/keyboard_provider.dart';
 import 'package:wordle/states/oauth_provider.dart';
 import 'package:wordle/widgets/keyboard.dart';
 import 'package:wordle/widgets/wordpad.dart';
+
+import '../widgets/new_keyboard.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({Key? key}) : super(key: key);
@@ -94,7 +97,7 @@ class GameScreen extends StatelessWidget {
             Expanded(child: Container()),
             const Keyboard(),
             Visibility(
-              child: const Keyboard(),
+              child: const NewKeyboard(locale: LanguageLocale.en()),
               visible: context.watch<KeyboardProvider>().visible,
             )
           ],

@@ -11,6 +11,8 @@ enum SubmissionResult {
   notMatch,
 }
 
+enum LetterStatus { pressed, correct, misplaced, intact }
+
 class WordRowState {
   WordRowState({required this.word, required this.state}) : radius = 8;
 
@@ -37,6 +39,15 @@ class WordRowState {
   final String word;
   final SubmissionResult state;
   final double radius;
+}
+
+class LetterState {
+  LetterState({required this.letter, required this.status});
+
+  LetterState.fromChar(this.letter) : status = LetterStatus.intact;
+
+  final String letter;
+  final LetterStatus status;
 }
 
 class KeyboardProvider with ChangeNotifier {
@@ -66,6 +77,13 @@ class KeyboardProvider with ChangeNotifier {
 
   String _guessWord = "";
   String get guessWord => _guessWord;
+
+  final List<LetterState> _alphabetKeys = const LanguageLocale.en()
+      .alphabet
+      .characters
+      .map<LetterState>((e) => LetterState.fromChar(e))
+      .toList();
+  List<LetterState> get alphabetKeys => _alphabetKeys;
 
   String _coloredFirstRow = const LanguageLocale.en().firstRow;
   String get coloredFirstRow => _coloredFirstRow;
@@ -162,6 +180,14 @@ class KeyboardProvider with ChangeNotifier {
   void appendLetter(int c) {
     if (_guessWord.length < numberOfLetters && _activeRow < numberOfGuesses) {
       _guessWord += String.fromCharCode(c);
+      _guessStates[_activeRow] = WordRowState.keyword(_guessWord);
+      notifyListeners();
+    }
+  }
+
+  void pushLetter(String c) {
+    if (_guessWord.length < numberOfLetters && _activeRow < numberOfGuesses) {
+      _guessWord += c;
       _guessStates[_activeRow] = WordRowState.keyword(_guessWord);
       notifyListeners();
     }
