@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class LifetimeReactor extends StatefulWidget {
   const LifetimeReactor({Key? key, required this.child}) : super(key: key);
 
@@ -16,12 +15,12 @@ class _LifetimeReactorState extends State<LifetimeReactor>
   void initState() {
     super.initState();
     _notification = AppLifecycleState.resumed;
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
