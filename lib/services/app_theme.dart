@@ -17,4 +17,7 @@ class AppTheme {
   static const Color correctLetterColor = Colors.green;
   static const Color usedLetterColor = Color.fromARGB(255, 98, 94, 94);
   static const Color misplacedLetterColor = Colors.orangeAccent;
+
+  static const Color appBarFontColor = Colors.white;
+  static const Color appBarActiveFontColor = Colors.amber;
 }

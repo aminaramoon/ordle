@@ -18,73 +18,32 @@ class GameScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppTheme.appbarBackgroundColor,
         title: const Text("Ordle"),
-        leading: Builder(
-          builder: (BuildContext context) {
-            return IconButton(
-              icon: const Icon(Icons.account_circle),
-              tooltip: 'user',
-              onPressed: () => Scaffold.of(context).openDrawer(),
-            );
-          },
-        ),
         actions: [
           TextButton(
-            child: const Text("hard"),
+            child: Text(
+              "hard",
+              style: TextStyle(
+                  color: context.watch<KeyboardProvider>().hardMode
+                      ? AppTheme.appBarActiveFontColor
+                      : AppTheme.appBarFontColor),
+            ),
             onPressed: () => context.read<KeyboardProvider>().toggleHardMode(),
           ),
           TextButton(
-            child: const Text("redo"),
+            child: const Text(
+              "redo",
+              style: TextStyle(color: AppTheme.appBarFontColor),
+            ),
             onPressed: () => context.read<KeyboardProvider>().reset(),
           ),
           TextButton(
-            child: const Text("skip"),
+            child: const Text(
+              "skip",
+              style: TextStyle(color: AppTheme.appBarFontColor),
+            ),
             onPressed: () => context.read<KeyboardProvider>().newGame(null),
           ),
         ],
-      ),
-      drawer: Drawer(
-        child: Container(
-          color: AppTheme.backgroundColor,
-          padding: EdgeInsets.zero,
-          child: Column(
-            children: [
-              UserAccountsDrawerHeader(
-                currentAccountPicture: CircleAvatar(
-                  backgroundImage: NetworkImage(
-                    context.watch<OAuthProvider>().imageUrl,
-                  ),
-                ),
-                accountEmail: Text(context.watch<OAuthProvider>().emailAddress),
-                accountName: Text(
-                  context.watch<OAuthProvider>().name,
-                  style: const TextStyle(fontSize: 24.0),
-                ),
-                decoration: const BoxDecoration(
-                  color: AppTheme.appbarBackgroundColor,
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.verified_user_sharp),
-                title: const Text(
-                  'Log In',
-                  style: TextStyle(fontSize: 15.0),
-                ),
-                onTap: () => {},
-              ),
-              Expanded(
-                child: Container(),
-              ),
-              ListTile(
-                leading: const Icon(Icons.info),
-                title: const Text(
-                  'Information',
-                  style: TextStyle(fontSize: 15.0),
-                ),
-                onTap: () => {},
-              ),
-            ],
-          ),
-        ),
       ),
       body: Container(
         margin: const EdgeInsetsDirectional.only(top: 5),

@@ -139,7 +139,7 @@ class KeyboardProvider with ChangeNotifier {
   Future<SubmissionResult> submitAnswer() async {
     _keyword ??= await _dictionary.nextWord();
     if (_guessWord.length == numberOfLetters && _activeRow < numberOfGuesses) {
-      if (_hardMode && _isHardMatch(_guessWord)) {
+      if (_hardMode && !_isHardMatch(_guessWord)) {
         return SubmissionResult.notMatch;
       }
       final isWon = (_guessWord == _keyword);
@@ -206,9 +206,37 @@ class KeyboardProvider with ChangeNotifier {
 
   void toggleHardMode() {
     _hardMode = !_hardMode;
+    notifyListeners();
   }
 
   bool _isHardMatch(String string) {
+    if (_activeRow == 0) {
+      return true;
+    }
+    final List<String> guessLetters = List.generate(
+        keyword.length, (index) => string.characters.elementAt(index));
+    final lastLetters = _guessWords[_activeRow - 1].letters;
+    int index = 0;
+    for (final prevLetter in lastLetters) {
+      if (prevLetter.status == LetterStatus.correct) {
+        if (string.characters.elementAt(index) != prevLetter.letter) {
+          return false;
+        }
+        guessLetters[index] = "";
+      }
+      index++;
+    }
+    index = 0;
+    for (final prevLetter in lastLetters) {
+      if (prevLetter.status == LetterStatus.misplaced) {
+        final cIndex = guessLetters.indexOf(prevLetter.letter);
+        if (cIndex == -1) {
+          return false;
+        }
+        guessLetters[cIndex] = "";
+      }
+      index++;
+    }
     return true;
   }
 

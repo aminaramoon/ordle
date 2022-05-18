@@ -245,7 +245,7 @@ class Keyboard extends StatelessWidget {
                       borderRadius: BorderRadius.all(Radius.circular(2.0)),
                     ),
                   ),
-                  child: const Icon(Icons.arrow_drop_down),
+                  child: const Icon(Icons.arrow_drop_up),
                   onPressed: () => {},
                 ),
               ),
