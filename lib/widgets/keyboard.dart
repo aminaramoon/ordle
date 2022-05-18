@@ -123,6 +123,73 @@ class Keyboard extends StatelessWidget {
 
   final LanguageLocale locale;
 
+  void submitButtonCallback(BuildContext context) async {
+    var provider = context.read<KeyboardProvider>();
+    var result = await provider.submitAnswer();
+    if (result == SubmissionResult.correct) {
+      showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (context) => AlertDialog(
+                title: Text(provider.winningMessage),
+                content: Text("word was ${provider.guessWord.toLowerCase()}"),
+                backgroundColor: Colors.green,
+                actions: [
+                  TextButton(
+                    child: const Text("new game"),
+                    onPressed: () {
+                      provider.newGame(null);
+                      Navigator.of(context, rootNavigator: false).pop();
+                    },
+                  ),
+                ],
+              ));
+    } else if (result == SubmissionResult.invalid) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          content: Text("not a word ${provider.guessWord.toLowerCase()}"),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 1),
+          backgroundColor: const Color.fromARGB(255, 19, 20, 20),
+        ));
+    } else if (result == SubmissionResult.done) {
+      showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (context) => AlertDialog(
+                title: const Text("Game Over!"),
+                content: Text("word is ${provider.keyword.toLowerCase()}"),
+                actions: [
+                  TextButton(
+                    child: const Text("new game"),
+                    onPressed: () {
+                      provider.newGame(null);
+                      Navigator.of(context, rootNavigator: false).pop();
+                    },
+                  ),
+                ],
+              ));
+    } else if (result == SubmissionResult.notMatch) {
+      showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (context) => AlertDialog(
+                title: const Text("Warning!!"),
+                content: Text(
+                    "${provider.guessWord} doesn't use all the hints from previous guesses"),
+                actions: [
+                  TextButton(
+                    child: const Text("continue"),
+                    onPressed: () {
+                      Navigator.of(context, rootNavigator: false).pop();
+                    },
+                  ),
+                ],
+              ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -145,84 +212,8 @@ class Keyboard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ActionKey(
-                    icon: Icons.keyboard_return_rounded,
-                    callback: () async {
-                      var provider = context.read<KeyboardProvider>();
-                      var result = await provider.submitAnswer();
-                      if (result == SubmissionResult.correct) {
-                        showDialog(
-                            barrierDismissible: false,
-                            context: context,
-                            builder: (context) => AlertDialog(
-                                  title: Text(provider.winningMessage),
-                                  content: Text(
-                                      "word was ${provider.guessWord.toLowerCase()}"),
-                                  backgroundColor: Colors.green,
-                                  actions: [
-                                    TextButton(
-                                      child: const Text("new game"),
-                                      onPressed: () {
-                                        provider.newGame(null);
-                                        Navigator.of(context,
-                                                rootNavigator: false)
-                                            .pop();
-                                      },
-                                    ),
-                                  ],
-                                ));
-                      } else if (result == SubmissionResult.invalid) {
-                        ScaffoldMessenger.of(context)
-                          ..hideCurrentSnackBar()
-                          ..showSnackBar(SnackBar(
-                            content: Text(
-                                "not a word ${provider.guessWord.toLowerCase()}"),
-                            behavior: SnackBarBehavior.floating,
-                            duration: const Duration(seconds: 1),
-                            backgroundColor:
-                                const Color.fromARGB(255, 19, 20, 20),
-                          ));
-                      } else if (result == SubmissionResult.done) {
-                        showDialog(
-                            barrierDismissible: false,
-                            context: context,
-                            builder: (context) => AlertDialog(
-                                  title: const Text("done"),
-                                  content: Text(
-                                      "word is ${provider.keyword.toLowerCase()}"),
-                                  actions: [
-                                    TextButton(
-                                      child: const Text("new game"),
-                                      onPressed: () {
-                                        provider.newGame(null);
-                                        Navigator.of(context,
-                                                rootNavigator: false)
-                                            .pop();
-                                      },
-                                    ),
-                                  ],
-                                ));
-                      } else if (result == SubmissionResult.notMatch) {
-                        showDialog(
-                            barrierDismissible: false,
-                            context: context,
-                            builder: (context) => AlertDialog(
-                                  title: const Text("done"),
-                                  content: Text(
-                                      "word is ${provider.hardModeMismatchMsg}"),
-                                  actions: [
-                                    TextButton(
-                                      child: const Text("continue"),
-                                      onPressed: () {
-                                        Navigator.of(context,
-                                                rootNavigator: false)
-                                            .pop();
-                                      },
-                                    ),
-                                  ],
-                                ));
-                      }
-                    },
-                  ),
+                      icon: Icons.keyboard_return_rounded,
+                      callback: () async => submitButtonCallback(context)),
                   KeyRow(
                     firstIndex: locale.thirdRowIndex,
                     secondIndex: locale.alphabet.length,
