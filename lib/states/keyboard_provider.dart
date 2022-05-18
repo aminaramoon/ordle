@@ -140,6 +140,7 @@ class KeyboardProvider with ChangeNotifier {
     _keyword ??= await _dictionary.nextWord();
     if (_guessWord.length == numberOfLetters && _activeRow < numberOfGuesses) {
       if (_hardMode && !_isHardMatch(_guessWord)) {
+        guessWords[_activeRow].submissionResult = SubmissionResult.notMatch;
         return SubmissionResult.notMatch;
       }
       final isWon = (_guessWord == _keyword);
@@ -147,15 +148,18 @@ class KeyboardProvider with ChangeNotifier {
       if (hasMeaning) {
         _guessWords[_activeRow].compareWord(keyword);
         _updateKeyboard();
+        SubmissionResult result = isWon
+            ? SubmissionResult.correct
+            : _activeRow == numberOfGuesses - 1
+                ? SubmissionResult.done
+                : SubmissionResult.incorrect;
+        guessWords[_activeRow].submissionResult = result;
         _activeRow += 1;
         _guessWord = "";
         notifyListeners();
-        return isWon
-            ? SubmissionResult.correct
-            : _activeRow == numberOfGuesses
-                ? SubmissionResult.done
-                : SubmissionResult.incorrect;
+        return result;
       } else {
+        guessWords[_activeRow].submissionResult = SubmissionResult.invalid;
         notifyListeners();
         return SubmissionResult.invalid;
       }

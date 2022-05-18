@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordle/services/app_theme.dart';
@@ -72,6 +74,30 @@ class WordCard extends StatelessWidget {
   }
 }
 
+class ShakingPanel extends StatelessWidget {
+  const ShakingPanel({Key? key, required this.shake, required this.child})
+      : super(key: key);
+
+  final bool shake;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return !shake
+        ? child
+        : TweenAnimationBuilder(
+            child: child,
+            curve: Curves.easeInOutCirc,
+            tween: Tween(begin: 1.0, end: 0.0),
+            duration: const Duration(milliseconds: 400),
+            builder: (context, double value, child) {
+              return Transform.translate(
+                  offset: Offset(sin(value * 2 * pi) * 5, 0.0), child: child);
+            },
+          );
+  }
+}
+
 class WordPads extends StatelessWidget {
   const WordPads({Key? key, required this.numberOfGuesses}) : super(key: key);
 
@@ -82,7 +108,16 @@ class WordPads extends StatelessWidget {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(6, (index) => WordCard(index: index)),
+        children: List.generate(
+          6,
+          (index) => ShakingPanel(
+              child: WordCard(index: index),
+              shake: context
+                      .watch<KeyboardProvider>()
+                      .guessWords[index]
+                      .submissionResult ==
+                  SubmissionResult.invalid),
+        ),
       ),
     );
   }

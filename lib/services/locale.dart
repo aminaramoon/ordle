@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 class LanguageLocale {
   const LanguageLocale.en()
       : _firstRow = 'QWERTYUIOP',
