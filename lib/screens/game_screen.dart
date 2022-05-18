@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:wordle/services/app_theme.dart';
 import 'package:wordle/services/locale.dart';
 import 'package:wordle/states/keyboard_provider.dart';
-import 'package:wordle/states/oauth_provider.dart';
 import 'package:wordle/widgets/wordpad.dart';
 import 'package:wordle/widgets/keyboard.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class GameScreen extends StatelessWidget {
   const GameScreen({Key? key}) : super(key: key);
@@ -21,25 +21,36 @@ class GameScreen extends StatelessWidget {
         actions: [
           TextButton(
             child: Text(
-              "hard",
-              style: TextStyle(
+              "nerd",
+              style: GoogleFonts.actor(
+                textStyle: TextStyle(
                   color: context.watch<KeyboardProvider>().hardMode
                       ? AppTheme.appBarActiveFontColor
-                      : AppTheme.appBarFontColor),
+                      : AppTheme.appBarFontColor,
+                ),
+              ),
             ),
             onPressed: () => context.read<KeyboardProvider>().toggleHardMode(),
           ),
           TextButton(
-            child: const Text(
+            child: Text(
               "redo",
-              style: TextStyle(color: AppTheme.appBarFontColor),
+              style: GoogleFonts.actor(
+                textStyle: const TextStyle(
+                  color: AppTheme.appBarFontColor,
+                ),
+              ),
             ),
             onPressed: () => context.read<KeyboardProvider>().reset(),
           ),
           TextButton(
-            child: const Text(
+            child: Text(
               "skip",
-              style: TextStyle(color: AppTheme.appBarFontColor),
+              style: GoogleFonts.actor(
+                textStyle: const TextStyle(
+                  color: AppTheme.appBarFontColor,
+                ),
+              ),
             ),
             onPressed: () => context.read<KeyboardProvider>().newGame(null),
           ),
