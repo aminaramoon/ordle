@@ -1,27 +1,23 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wordle/services/app_theme.dart';
 import 'package:wordle/states/keyboard_provider.dart';
 
-class LetterPad extends StatelessWidget {
-  LetterPad({Key? key, int code = 0, required this.radius}) : super(key: key) {
-    if (code == 0) {
-      letter = " ";
-      backgroundColor = AppTheme.panelColor;
-    } else {
-      letter = String.fromCharCode(code & 0xFF);
-      backgroundColor = (code & 0x300 == 0)
-          ? AppTheme.panelColor
-          : (code & 0x100 != 0)
-              ? AppTheme.correctLetterColor
-              : AppTheme.misplacedLetterColor;
-    }
-  }
+class LetterCard extends StatelessWidget {
+  const LetterCard(
+      {Key? key, required this.letter, required LetterStatus status})
+      : backgroundColor = status == LetterStatus.correct
+            ? AppTheme.correctLetterColor
+            : status == LetterStatus.misplaced
+                ? AppTheme.misplacedLetterColor
+                : status == LetterStatus.pressed
+                    ? AppTheme.usedLetterColor
+                    : AppTheme.keypadColor,
+        radius = status != LetterStatus.intact ? 25.0 : 10.0,
+        super(key: key);
 
-  late final String letter;
-  late final Color backgroundColor;
+  final String letter;
+  final Color backgroundColor;
   final double radius;
 
   @override
@@ -54,41 +50,25 @@ class LetterPad extends StatelessWidget {
   }
 }
 
-class WordPad extends StatelessWidget {
-  WordPad(
-      {Key? key,
-      String keyword = "",
-      required this.radius,
-      required this.shake})
-      : super(key: key) {
-    wordState = (keyword + "      ").substring(0, 5);
-  }
+class WordCard extends StatelessWidget {
+  const WordCard({Key? key, required this.index}) : super(key: key);
 
-  late final String wordState;
-  final double radius;
-  final bool shake;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
-    Widget myWidget = Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: wordState.characters
-            .map<LetterPad>((element) => LetterPad(
-                  code: element.codeUnitAt(0),
-                  radius: radius,
-                ))
-            .toList());
-    return !shake
-        ? myWidget
-        : TweenAnimationBuilder(
-            child: myWidget,
-            curve: Curves.easeInOutCirc,
-            tween: Tween(begin: 1.0, end: 0.0),
-            duration: const Duration(milliseconds: 400),
-            builder: (context, double value, child) {
-              return Transform.translate(
-                  offset: Offset(sin(value * 2 * pi) * 5, 0.0), child: child);
-            });
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (int i = 0; i != 5; ++i)
+          Selector<KeyboardProvider, LetterState>(
+            selector: (_, provider) => provider.guessWords[index].letters[i],
+            builder: (context, state, _) {
+              return LetterCard(letter: state.letter, status: state.status);
+            },
+          )
+      ],
+    );
   }
 }
 
@@ -102,18 +82,7 @@ class WordPads extends StatelessWidget {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          for (int i = 0; i != numberOfGuesses; ++i)
-            Selector<KeyboardProvider, WordRowState>(
-                selector: (_, provider) => provider.guessStates[i],
-                builder: (context, state, child) {
-                  return WordPad(
-                    keyword: state.word,
-                    radius: state.radius,
-                    shake: state.state == SubmissionResult.invalid,
-                  );
-                })
-        ],
+        children: List.generate(6, (index) => WordCard(index: index)),
       ),
     );
   }

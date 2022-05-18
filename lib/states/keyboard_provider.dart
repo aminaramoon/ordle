@@ -11,43 +11,75 @@ enum SubmissionResult {
   notMatch,
 }
 
-enum LetterStatus { pressed, correct, misplaced, intact }
-
-class WordRowState {
-  WordRowState({required this.word, required this.state}) : radius = 8;
-
-  WordRowState.empty()
-      : word = "",
-        state = SubmissionResult.incomplete,
-        radius = 8;
-
-  WordRowState.keyword(String keyword)
-      : word = keyword,
-        state = SubmissionResult.incomplete,
-        radius = 8;
-
-  WordRowState.fromGuess(String keyword)
-      : word = keyword,
-        state = SubmissionResult.correct,
-        radius = 20;
-
-  WordRowState.fromInvalidWord(String keyword)
-      : word = keyword,
-        state = SubmissionResult.invalid,
-        radius = 8;
-
-  final String word;
-  final SubmissionResult state;
-  final double radius;
-}
+enum LetterStatus { intact, pressed, misplaced, correct }
 
 class LetterState {
   LetterState({required this.letter, required this.status});
+
+  LetterState.empty()
+      : letter = "",
+        status = LetterStatus.intact;
 
   LetterState.fromChar(this.letter) : status = LetterStatus.intact;
 
   final String letter;
   final LetterStatus status;
+}
+
+class WordState {
+  WordState({required this.letters, required this.submissionResult})
+      : _activeLetter = letters.length;
+
+  WordState.empty(int numberLetters)
+      : letters = List.filled(numberLetters, LetterState.empty()),
+        submissionResult = SubmissionResult.incomplete;
+
+  void appendLetter(String letter) {
+    if (_activeLetter < letters.length) {
+      letters[_activeLetter] =
+          LetterState(letter: letter, status: LetterStatus.intact);
+      _activeLetter++;
+    }
+  }
+
+  void removeLetter() {
+    if (_activeLetter > 0) {
+      letters[_activeLetter - 1] = LetterState.empty();
+      _activeLetter--;
+    }
+  }
+
+  void compareWord(String keyword) {
+    final List<String> keywordLetters = List.generate(
+        keyword.length, (index) => keyword.characters.elementAt(index));
+    int index = 0;
+    for (var letter in keywordLetters) {
+      if (letters.elementAt(index).letter == letter) {
+        letters[index] =
+            LetterState(letter: letter, status: LetterStatus.correct);
+        keywordLetters[index] = "";
+      }
+      index++;
+    }
+
+    index = 0;
+    for (var element in letters) {
+      if (element.status != LetterStatus.correct) {
+        int keyIndex = keywordLetters.indexOf(element.letter);
+        LetterStatus status = LetterStatus.pressed;
+        if (keyIndex != -1) {
+          status = LetterStatus.misplaced;
+          keywordLetters[keyIndex] = "";
+        }
+        letters[index] = LetterState(letter: element.letter, status: status);
+      }
+      index++;
+    }
+  }
+
+  List<LetterState> letters;
+  SubmissionResult submissionResult;
+  int _activeLetter = 0;
 }
 
 class KeyboardProvider with ChangeNotifier {
@@ -63,6 +95,8 @@ class KeyboardProvider with ChangeNotifier {
   final int _numberOfGuesses = 6;
   int get numberOfGuesses => _numberOfGuesses;
 
+  Map<String, int>? _charToIndexMap;
+
   bool _hardMode = false;
   bool get hardMode => _hardMode;
 
@@ -71,9 +105,10 @@ class KeyboardProvider with ChangeNotifier {
 
   int _activeRow = 0;
 
-  List<WordRowState> _guessStates =
-      List<WordRowState>.filled(6, WordRowState.empty(), growable: false);
-  List<WordRowState> get guessStates => _guessStates;
+  // ignore: prefer_final_fields
+  List<WordState> _guessWords =
+      List.generate(6, (index) => WordState.empty(5), growable: false);
+  List<WordState> get guessWords => _guessWords;
 
   String _guessWord = "";
   String get guessWord => _guessWord;
@@ -85,68 +120,20 @@ class KeyboardProvider with ChangeNotifier {
       .toList();
   List<LetterState> get alphabetKeys => _alphabetKeys;
 
-  String _coloredFirstRow = const LanguageLocale.en().firstRow;
-  String get coloredFirstRow => _coloredFirstRow;
-
-  String _coloredSecondRow = const LanguageLocale.en().secondRow;
-  String get coloredSecondRow => _coloredSecondRow;
-
-  String _coloredThirdRow = const LanguageLocale.en().thirdRow;
-  String get coloredThirdRow => _coloredThirdRow;
-
   void newGame(String? keyword) async {
     _keyword = keyword ??= await _dictionary.nextWord();
     reset();
   }
 
   void reset() {
-    _coloredFirstRow = _locale.firstRow;
-    _coloredSecondRow = _locale.secondRow;
-    _coloredThirdRow = _locale.thirdRow;
     _activeRow = 0;
     _guessWord = "";
-    _guessStates =
-        List<WordRowState>.filled(6, WordRowState.empty(), growable: false);
-    notifyListeners();
-  }
-
-  void updateKeyboard(String comparedKeyword) {
-    for (final element in comparedKeyword.characters) {
-      int eCode = element.codeUnitAt(0);
-      int eCharCode = eCode & 0x7F;
-      for (int i = 0; i != _coloredFirstRow.characters.length; ++i) {
-        final char = _coloredFirstRow.characters.elementAt(i);
-        int code = char.codeUnitAt(0);
-        if ((0x7F & code) == eCharCode) {
-          code = code | eCode | 0x80;
-          _coloredFirstRow = _coloredFirstRow.replaceFirst(
-              RegExp(char), String.fromCharCode(code), i);
-          break;
-        }
-      }
-
-      for (int i = 0; i != _coloredSecondRow.characters.length; ++i) {
-        final char = _coloredSecondRow.characters.elementAt(i);
-        int code = char.codeUnitAt(0);
-        if ((0x7F & code) == eCharCode) {
-          code = code | eCode | 0x80;
-          _coloredSecondRow = _coloredSecondRow.replaceFirst(
-              RegExp(char), String.fromCharCode(code), i);
-          break;
-        }
-      }
-
-      for (int i = 0; i != _coloredThirdRow.characters.length; ++i) {
-        final char = _coloredThirdRow.characters.elementAt(i);
-        int code = char.codeUnitAt(0);
-        if ((0x7F & code) == eCharCode) {
-          code = code | eCode | 0x80;
-          _coloredThirdRow = _coloredThirdRow.replaceFirst(
-              RegExp(char), String.fromCharCode(code), i);
-          break;
-        }
-      }
+    _guessWords =
+        List.generate(6, (index) => WordState.empty(5), growable: false);
+    for (int i = 0; i != _locale.alphabet.length; ++i) {
+      _alphabetKeys[i] = LetterState.fromChar(_locale.alphabet[i]);
     }
+    notifyListeners();
   }
 
   Future<SubmissionResult> submitAnswer() async {
@@ -155,11 +142,11 @@ class KeyboardProvider with ChangeNotifier {
       if (_hardMode && _isHardMatch(_guessWord)) {
         return SubmissionResult.notMatch;
       }
-      final hasMeaning =
-          (_guessWord == _keyword) || await _dictionary.isWord(_guessWord);
+      final isWon = (_guessWord == _keyword);
+      final hasMeaning = isWon || await _dictionary.isWord(_guessWord);
       if (hasMeaning) {
-        final isWon = _compareAnswers(_keyword!);
-        _guessStates[_activeRow] = WordRowState.fromGuess(_guessWord);
+        _guessWords[_activeRow].compareWord(keyword);
+        _updateKeyboard();
         _activeRow += 1;
         _guessWord = "";
         notifyListeners();
@@ -169,7 +156,6 @@ class KeyboardProvider with ChangeNotifier {
                 ? SubmissionResult.done
                 : SubmissionResult.incorrect;
       } else {
-        _guessStates[_activeRow] = WordRowState.fromInvalidWord(_guessWord);
         notifyListeners();
         return SubmissionResult.invalid;
       }
@@ -177,18 +163,10 @@ class KeyboardProvider with ChangeNotifier {
     return SubmissionResult.incomplete;
   }
 
-  void appendLetter(int c) {
-    if (_guessWord.length < numberOfLetters && _activeRow < numberOfGuesses) {
-      _guessWord += String.fromCharCode(c);
-      _guessStates[_activeRow] = WordRowState.keyword(_guessWord);
-      notifyListeners();
-    }
-  }
-
   void pushLetter(String c) {
     if (_guessWord.length < numberOfLetters && _activeRow < numberOfGuesses) {
       _guessWord += c;
-      _guessStates[_activeRow] = WordRowState.keyword(_guessWord);
+      _guessWords[_activeRow].appendLetter(c);
       notifyListeners();
     }
   }
@@ -196,7 +174,7 @@ class KeyboardProvider with ChangeNotifier {
   void removeLetter() {
     if (_guessWord.isNotEmpty && _activeRow < numberOfGuesses) {
       _guessWord = _guessWord.characters.skipLast(1).toString();
-      _guessStates[_activeRow] = WordRowState.keyword(_guessWord);
+      _guessWords[_activeRow].removeLetter();
       notifyListeners();
     }
   }
@@ -204,10 +182,11 @@ class KeyboardProvider with ChangeNotifier {
   String get winningMessage {
     switch (_activeRow) {
       case 0:
-        return "one in a million!";
+        return "WOW!";
       case 1:
-        return "great job!";
+        return "one in a million!";
       case 2:
+        return "great job!";
       case 3:
       case 4:
         return "good job!";
@@ -233,40 +212,17 @@ class KeyboardProvider with ChangeNotifier {
     return true;
   }
 
-  bool _compareAnswers(String keyword) {
-    String comparedWord = "";
-    int correctLetters = 0;
-
-    String keywordCpy = "";
-    String guessWord = "";
-    for (int i = 0; i != numberOfLetters; i++) {
-      final kChar = keyword.characters.elementAt(i);
-      final gChar = _guessWord.characters.elementAt(i);
-      if (kChar == gChar) {
-        correctLetters += 1;
-        keywordCpy += String.fromCharCode(kChar.codeUnitAt(0) | 0x100);
-        guessWord += String.fromCharCode(gChar.codeUnitAt(0) | 0x100);
-      } else {
-        keywordCpy += kChar;
-        guessWord += gChar;
+  void _updateKeyboard() {
+    _charToIndexMap ??= _locale.getLetterToIndexMap();
+    final letters = _guessWords[_activeRow].letters;
+    for (final ls in letters) {
+      final index = _charToIndexMap![ls.letter];
+      if (index != null) {
+        if (ls.status.index > _alphabetKeys[index].status.index) {
+          _alphabetKeys[index] =
+              LetterState(letter: ls.letter, status: ls.status);
+        }
       }
     }
-
-    for (int i = 0; i != numberOfLetters; i++) {
-      final char = guessWord.characters.elementAt(i);
-      final isFound = keywordCpy.contains(char);
-      if (isFound && char == keywordCpy.characters.elementAt(i)) {
-        comparedWord += char;
-      } else if (isFound) {
-        comparedWord += String.fromCharCode(
-            guessWord.characters.elementAt(i).codeUnitAt(0) | 0x200);
-        keywordCpy = keywordCpy.replaceFirst(RegExp(char), '0');
-      } else {
-        comparedWord += guessWord.characters.elementAt(i);
-      }
-    }
-    _guessWord = comparedWord;
-    updateKeyboard(comparedWord);
-    return correctLetters == numberOfLetters;
   }
 }

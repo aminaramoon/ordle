@@ -4,19 +4,21 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:wordle/services/app_theme.dart';
 import 'package:wordle/states/keyboard_provider.dart';
+import 'package:wordle/services/locale.dart';
 
-class CharKeyPad extends StatelessWidget {
-  const CharKeyPad({Key? key, required this.code})
-      : backgroundColor = code & 0x780 == 0
-            ? AppTheme.keypadColor
-            : (code & 0x100 != 0)
-                ? AppTheme.correctLetterColor
-                : (code & 0x200 != 0)
-                    ? AppTheme.misplacedLetterColor
-                    : AppTheme.usedLetterColor,
+class LetterKey extends StatelessWidget {
+  const LetterKey(
+      {Key? key, required this.letter, required LetterStatus status})
+      : backgroundColor = status == LetterStatus.correct
+            ? AppTheme.correctLetterColor
+            : status == LetterStatus.misplaced
+                ? AppTheme.misplacedLetterColor
+                : status == LetterStatus.pressed
+                    ? AppTheme.usedLetterColor
+                    : AppTheme.keypadColor,
         super(key: key);
 
-  final int code;
+  final String letter;
   final Color backgroundColor;
 
   @override
@@ -36,7 +38,7 @@ class CharKeyPad extends StatelessWidget {
           ),
           child: Center(
             child: Text(
-              String.fromCharCode(code & 0x7f),
+              letter,
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -46,7 +48,7 @@ class CharKeyPad extends StatelessWidget {
           ),
           onPressed: () {
             HapticFeedback.lightImpact();
-            context.read<KeyboardProvider>().appendLetter(code & 0x7f);
+            context.read<KeyboardProvider>().pushLetter(letter);
           },
         ),
       ),
@@ -54,8 +56,8 @@ class CharKeyPad extends StatelessWidget {
   }
 }
 
-class ActionKeyPad extends StatelessWidget {
-  const ActionKeyPad({Key? key, required this.icon, this.callback})
+class ActionKey extends StatelessWidget {
+  const ActionKey({Key? key, required this.icon, this.callback})
       : super(key: key);
 
   final IconData icon;
@@ -91,25 +93,35 @@ class ActionKeyPad extends StatelessWidget {
   }
 }
 
-class KeyPadRow extends StatelessWidget {
-  const KeyPadRow({Key? key, required this.keys}) : super(key: key);
+class KeyRow extends StatelessWidget {
+  const KeyRow({Key? key, required this.firstIndex, required this.secondIndex})
+      : super(key: key);
 
-  final String keys;
+  final int firstIndex;
+  final int secondIndex;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
-      children: keys.characters
-          .map<CharKeyPad>((e) => CharKeyPad(code: e.codeUnitAt(0)))
-          .toList(),
+      children: [
+        for (int i = firstIndex; i != secondIndex; ++i)
+          Selector<KeyboardProvider, LetterState>(
+            selector: (_, provider) => provider.alphabetKeys[i],
+            builder: (context, state, _) {
+              return LetterKey(letter: state.letter, status: state.status);
+            },
+          )
+      ],
     );
   }
 }
 
 class Keyboard extends StatelessWidget {
-  const Keyboard({Key? key}) : super(key: key);
+  const Keyboard({Key? key, required this.locale}) : super(key: key);
+
+  final LanguageLocale locale;
 
   @override
   Widget build(BuildContext context) {
@@ -120,21 +132,19 @@ class Keyboard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Selector<KeyboardProvider, String>(
-                selector: (_, provider) => provider.coloredFirstRow,
-                builder: (context, keypads, child) {
-                  return KeyPadRow(keys: keypads);
-                }),
-            Selector<KeyboardProvider, String>(
-                selector: (_, provider) => provider.coloredSecondRow,
-                builder: (context, keypads, child) {
-                  return KeyPadRow(keys: keypads);
-                }),
+            KeyRow(
+              firstIndex: 0,
+              secondIndex: locale.secondRowIndex,
+            ),
+            KeyRow(
+              firstIndex: locale.secondRowIndex,
+              secondIndex: locale.thirdRowIndex,
+            ),
             Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ActionKeyPad(
+                  ActionKey(
                     icon: Icons.keyboard_return_rounded,
                     callback: () async {
                       var provider = context.read<KeyboardProvider>();
@@ -213,12 +223,11 @@ class Keyboard extends StatelessWidget {
                       }
                     },
                   ),
-                  Selector<KeyboardProvider, String>(
-                      selector: (_, provider) => provider.coloredThirdRow,
-                      builder: (context, keypads, child) {
-                        return KeyPadRow(keys: keypads);
-                      }),
-                  ActionKeyPad(
+                  KeyRow(
+                    firstIndex: locale.thirdRowIndex,
+                    secondIndex: locale.alphabet.length,
+                  ),
+                  ActionKey(
                     icon: Icons.backspace,
                     callback: () =>
                         context.read<KeyboardProvider>().removeLetter(),
